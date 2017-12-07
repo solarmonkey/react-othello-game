@@ -7,4 +7,4 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 To build it for production: `npm run build`
 
-A live demo of the project can be found [here](https://mborgbrant.github.io/react-othello-game/))
+A live demo of the project can be found [here](https://mborgbrant.github.io/react-othello-game/)
