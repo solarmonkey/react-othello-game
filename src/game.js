@@ -26,7 +26,7 @@ export default class Game extends React.Component {
 	}
 
 	calculateWinner(xNumbers, oNumbers) {
-		return (xNumbers + oNumbers < 64) ? null : (xNumbers === oNumbers) ? 'XO' : (xNumbers > oNumbers ? 'X' : 'O');
+		return (xNumbers + oNumbers < 64) && xNumbers > 0 && oNumbers > 0 ? null : (xNumbers === oNumbers) ? 'XO' : (xNumbers > oNumbers ? 'X' : 'O');
 	}
 
 	flipSquares(squares, position, xIsNext) {
@@ -76,7 +76,7 @@ export default class Game extends React.Component {
 	checkAvailableMoves(color, squares) {
 		return squares
 			.map((value, index) => { return this.flipSquares(squares, index, color) ? index : null; })
-			.filter((item) => { return item; });
+			.filter((item) => { return item !== null; });
 	}
 
 	handleClick(i) {
