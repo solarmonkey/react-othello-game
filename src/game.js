@@ -127,6 +127,13 @@ export default class Game extends React.Component {
 		});
 	}
 
+	resetGame() {
+		this.jumpTo(0);
+		this.setState({
+			history: this.state.history.slice(0, 1)
+		})
+	}
+
 	render() {
 		const history = this.state.history.slice();
 		const current = history[this.state.stepNumber];
@@ -163,7 +170,8 @@ export default class Game extends React.Component {
 					<div className="game-board">
 						<Board squares={current.squares} availableMoves={availableMoves} onClick={(i) => this.handleClick(i)} />
 					</div>
-					<div className="game-status">{status}</div>
+					<div className="game-status">{status}&nbsp;{winner ? <button onClick={() => this.resetGame()}>Play again</button> : ''}</div>
+					<div></div>
 				</div>
 				<div className="game-info">
 					<div>White markers: {current.xNumbers}</div>
