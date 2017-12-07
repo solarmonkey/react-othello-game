@@ -26,7 +26,7 @@ export default class Game extends React.Component {
 	}
 
 	calculateWinner(xNumbers, oNumbers) {
-		return (xNumbers + oNumbers < 64) && xNumbers > 0 && oNumbers > 0 ? null : (xNumbers === oNumbers) ? 'XO' : (xNumbers > oNumbers ? 'X' : 'O');
+		return (xNumbers + oNumbers < 64) ? null : (xNumbers === oNumbers) ? 'XO' : (xNumbers > oNumbers ? 'X' : 'O');
 	}
 
 	flipSquares(squares, position, xIsNext) {
@@ -138,7 +138,7 @@ export default class Game extends React.Component {
 		const history = this.state.history.slice();
 		const current = history[this.state.stepNumber];
 
-		const winner = this.calculateWinner(current.xNumbers, current.oNumbers);
+		let winner = this.calculateWinner(current.xNumbers, current.oNumbers);
 
 		const moves = history.map((step, move) => {
 			const desc = move ? 'Go to move #' + move : 'Go to game start';
@@ -158,6 +158,12 @@ export default class Game extends React.Component {
 		}
 
 		let availableMoves = this.checkAvailableMoves(current.xWasNext, current.squares);
+		let availableMovesOpposite = this.checkAvailableMoves(!current.xWasNext, current.squares);
+
+		if ((availableMoves.length === 0) && (availableMovesOpposite.length === 0))
+		{
+			winner = current.xNumbers === current.oNumbers ? 'XO' : current.xNumbers > current.oNumbers ? 'X' : 'O';
+		}
 
 		let status =
 			winner ?
