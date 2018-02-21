@@ -4,9 +4,13 @@
   "private": true,
   "homepage": "http://mborgbrant.github.io/react-othello-game",
   "dependencies": {
+    "bufferutil": "^3.0.3",
+    "express": "^4.16.2",
+    "express-ws": "^3.0.0",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
-    "react-scripts": "1.0.17"
+    "react-scripts": "1.0.17",
+    "ws": "^4.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
