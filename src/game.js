@@ -2,6 +2,8 @@ import React from 'react';
 import Board from './board.js';
 import Ai from './ai.js';
 
+import { flipSquares } from './utils.js'
+
 // X is white, O is black
 const serverUrl = 'http://localhost:4000/'
 
@@ -58,7 +60,7 @@ export default class Game extends React.Component {
 
 		socket.onmessage = (e) => {
 			const message = e.data
-			console.info('Message received: ', message)
+			console.log('Message received', message)
 		}
 
 		socket.onclose = (e) => {
@@ -84,53 +86,9 @@ export default class Game extends React.Component {
 		return (xNumbers + oNumbers < 64) ? null : (xNumbers === oNumbers) ? 'XO' : (xNumbers > oNumbers ? 'X' : 'O');
 	}
 
-	flipSquares(squares, position, xIsNext) {
-		let modifiedBoard = null;
-		// Calculate row and col of the starting position
-		let [startX, startY] = [position % 8, (position - position % 8) / 8];
-
-		if (squares[position] !== null) {
-			return null;
-		}
-
-		// Iterate all directions, these numbers are the offsets in the array to reach next sqaure
-		[1, 7, 8, 9, -1, -7, -8, -9].forEach((offset) => {
-			let flippedSquares = modifiedBoard ? modifiedBoard.slice() : squares.slice();
-			let atLeastOneMarkIsFlipped = false;
-			let [lastXpos, lastYPos] = [startX, startY];
-
-			for (let y = position + offset; y < 64; y = y + offset) {
-
-				// Calculate the row and col of the current square
-				let [xPos, yPos] = [y % 8, (y - y % 8) / 8];
-
-				// Fix when board is breaking into a new row or col
-				if (Math.abs(lastXpos - xPos) > 1 || Math.abs(lastYPos - yPos) > 1) {
-					break;
-				}
-
-				// Next square was occupied with the opposite color
-				if (flippedSquares[y] === (!xIsNext ? 'X' : 'O')) {
-					flippedSquares[y] = xIsNext ? 'X' : 'O';
-					atLeastOneMarkIsFlipped = true;
-					[lastXpos, lastYPos] = [xPos, yPos];
-					continue;
-				}
-				// Next aquare was occupied with the same color
-				else if ((flippedSquares[y] === (xIsNext ? 'X' : 'O')) && atLeastOneMarkIsFlipped) {
-					flippedSquares[position] = xIsNext ? 'X' : 'O';
-					modifiedBoard = flippedSquares.slice();
-				}
-				break;
-			}
-		});
-
-		return modifiedBoard;
-	}
-
 	checkAvailableMoves(color, squares) {
 		return squares
-			.map((value, index) => { return this.flipSquares(squares, index, color) ? index : null; })
+			.map((value, index) => { return flipSquares(squares, index, color) ? index : null; })
 			.filter((item) => { return item !== null; });
 	}
 
@@ -145,7 +103,7 @@ export default class Game extends React.Component {
 			return;
 		}
 
-		const changedSquares = this.flipSquares(current.squares, i, this.state.xIsNext);
+		const changedSquares = flipSquares(current.squares, i, this.state.xIsNext);
 
 		if (changedSquares === null) {
 			return;
@@ -157,7 +115,7 @@ export default class Game extends React.Component {
 			? this.doRobotMove 
 			: this.socket.readyState === WebSocket.OPEN 
 				? this.prepareSendMove(i)
-				: () => {}
+				: () => { console.log('Next player') }
 
 		this.setState({
 			history: history.concat([{
@@ -182,8 +140,7 @@ export default class Game extends React.Component {
 	prepareSendMove(i) {
 		return () => {
 			const url = serverUrl + 'game/' + this.gameId + '/'
-			fetch(url, { method: 'PUT', body: this.state.history[this.state.history.length - 1] })
-				.then(response => response.json()).then(data => console.log(data))
+			fetch(url, { method: 'PUT', mode: 'cors', body: JSON.stringify(this.state.history[this.state.history.length - 1]) })
 			// this.socket.send({
 			// 	position: i
 			// })
