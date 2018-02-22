@@ -10,7 +10,7 @@
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
     "react-scripts": "1.0.17",
-    "ws": "^4.0.0"
+    "ws": "^4.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
