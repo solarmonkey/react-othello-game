@@ -143,10 +143,12 @@ export default class Game extends React.Component {
 			const headers = {
 				'Content-Type': 'application/json'
 			}
-			fetch(url, { method: 'PUT', mode: 'cors', headers, body: JSON.stringify(this.state.history[this.state.history.length - 1].squares) })
-			// this.socket.send({
-			// 	position: i
-			// })
+			fetch(url, { 
+				method: 'PUT', 
+				mode: 'cors', 
+				headers, 
+				body: JSON.stringify(this.state.history[this.state.history.length - 1].squares) 
+			})
 		}
 	}
 
