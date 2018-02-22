@@ -22,13 +22,14 @@ export default class Game extends React.Component {
 			}],
 			stepNumber: 0,
 			xIsNext: true,
-			blackisAi: true
+			blackisAi: false
 		}
 
 		if (document.location.hash) {
 			const url = serverUrl + 'game/' + document.location.hash.substring(1) + '/'
 			fetch(url).then(response => response.json()).then((data) => {
 				console.log(data)
+				this.gameId = data.id
 				this.initGame(data.board)
 				this.socket = this.openWebSocket()
 			})
@@ -37,7 +38,7 @@ export default class Game extends React.Component {
 			fetch(url, { method: 'POST' }).then(response => response.json()).then((data) => {
 				console.log(data)
 				this.initGame(data.board)
-
+				this.gameId = data.id
 				document.location.hash = data.id
 				this.socket = this.openWebSocket()
 			})
@@ -75,7 +76,7 @@ export default class Game extends React.Component {
 			}],
 			stepNumber: 0,
 			xIsNext: true,
-			blackisAi: true
+			blackisAi: false
 		})
 	}
 
@@ -180,9 +181,12 @@ export default class Game extends React.Component {
 
 	prepareSendMove(i) {
 		return () => {
-			this.socket.send({
-				position: i
-			})
+			const url = serverUrl + 'game/' + this.gameId + '/'
+			fetch(url, { method: 'PUT', body: this.state.history[this.state.history.length - 1] })
+				.then(response => response.json()).then(data => console.log(data))
+			// this.socket.send({
+			// 	position: i
+			// })
 		}
 	}
 
