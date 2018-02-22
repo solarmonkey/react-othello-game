@@ -9,7 +9,7 @@ const url = require('url')
 app.use(bodyParser.json())
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+    res.header("Access-Control-Allow-Headers", "*")
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS, DELETE")
     next()
 })
@@ -43,6 +43,7 @@ app.get('/game/:id/', (req, res) => {
 
 app.put('/game/:id/', (req, res) => {
     if (!games[req.params.id]) return res.sendStatus(404)
+    console.log(req.body)
     games[req.params.id].board = req.body
     res.sendStatus(200)
 })
