@@ -155,7 +155,7 @@ export default class Game extends React.Component {
 		const doMove = this.state.blackisAi
 			? this.doRobotMove 
 			: this.socket.readyState === WebSocket.OPEN 
-				? this.sendMove(i)
+				? this.prepareSendMove(i)
 				: () => {}
 
 		this.setState({
