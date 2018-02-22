@@ -140,7 +140,10 @@ export default class Game extends React.Component {
 	prepareSendMove(i) {
 		return () => {
 			const url = serverUrl + 'game/' + this.gameId + '/'
-			fetch(url, { method: 'PUT', mode: 'cors', body: JSON.stringify(this.state.history[this.state.history.length - 1]) })
+			const headers = {
+				'Content-Type': 'application/json'
+			}
+			fetch(url, { method: 'PUT', mode: 'cors', headers, body: JSON.stringify(this.state.history[this.state.history.length - 1].squares) })
 			// this.socket.send({
 			// 	position: i
 			// })
