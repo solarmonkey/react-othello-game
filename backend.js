@@ -30,7 +30,8 @@ app.post('/new-game/', (req, res) => {
     const id = Math.random().toString(36).substr(2, 9)
     games[id] = {
         id: id,
-        squares: flatten(newBoard())
+        squares: flatten(newBoard()),
+        xWasNext: true
     }
     res.status(201).send(games[id])
 })

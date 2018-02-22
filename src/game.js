@@ -31,53 +31,52 @@ export default class Game extends React.Component {
 			const url = serverUrl + 'game/' + document.location.hash.substring(1) + '/'
 			fetch(url).then(response => response.json()).then((data) => {
 				console.log(data)
-				this.gameId = data.id
-				this.initGame(data.squares)
+				this.initGame(data)
 				this.socket = this.openWebSocket()
 			})
 		} else {
 			const url = serverUrl + 'new-game/'
 			fetch(url, { method: 'POST' }).then(response => response.json()).then((data) => {
 				console.log(data)
-				this.initGame(data.squares)
-				this.gameId = data.id
+				this.initGame(data)
 				document.location.hash = data.id
 				this.socket = this.openWebSocket()
 			})
 		}
 	}
-
+	
 	openWebSocket() {
 		const socket = new WebSocket('ws://localhost:4000/')
-
+		
 		socket.onopen = (e) => {
 			console.log('Connected to ' + e.currentTarget.url)
 		}
-
+		
 		socket.onerror = (err) => {
 			console.warn('Websocket error: ' + err)
 		}
-
+		
 		socket.onmessage = (e) => {
 			const message = e.data
 			console.log('Message received', message)
 		}
-
+		
 		socket.onclose = (e) => {
 			console.log('Connection closed')
 		}
-
+		
 		return socket
 	}
-
-	initGame(initSquares) {
+	
+	initGame(data) {
+		this.gameId = data.id
 		this.setState({
 			history: [{
-				squares: initSquares,
-				xWasNext: true
+				squares: data.squares,
+				xWasNext: data.xWasNext
 			}],
 			stepNumber: 0,
-			xIsNext: true,
+			xIsNext: data.xWasNext,
 			blackisAi: false
 		})
 	}
