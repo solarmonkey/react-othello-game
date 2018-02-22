@@ -2,27 +2,81 @@ import React from 'react';
 import Board from './board.js';
 import Ai from './ai.js';
 
+// X is white, O is black
+const serverUrl = 'http://localhost:4000/'
+
 export default class Game extends React.Component {
 
 	constructor(props) {
 		super(props);
-
 		this.ai = new Ai(this);
-
+		this.isX = null
+		this.socket = null
+		
 		const initSquares = Array(64).fill(null);
-		[initSquares[8 * 3 + 3], initSquares[8 * 3 + 4], initSquares[8 * 4 + 4], initSquares[8 * 4 + 3]] = ['X', 'O', 'X', 'O'];
 
 		this.state = {
 			history: [{
 				squares: initSquares,
-				xNumbers: 2,
-				oNumbers: 2,
 				xWasNext: true
 			}],
 			stepNumber: 0,
 			xIsNext: true,
 			blackisAi: true
 		}
+
+		if (document.location.hash) {
+			const url = serverUrl + 'game/' + document.location.hash.substring(1) + '/'
+			fetch(url).then(response => response.json()).then((data) => {
+				console.log(data)
+				this.initGame(data.board)
+				this.socket = this.openWebSocket()
+			})
+		} else {
+			const url = serverUrl + 'new-game/'
+			fetch(url, { method: 'POST' }).then(response => response.json()).then((data) => {
+				console.log(data)
+				this.initGame(data.board)
+
+				document.location.hash = data.id
+				this.socket = this.openWebSocket()
+			})
+		}
+	}
+
+	openWebSocket() {
+		const socket = new WebSocket('ws://localhost:4000/')
+
+		socket.onopen = (e) => {
+			console.log('Connected to ' + e.currentTarget.url)
+		}
+
+		socket.onerror = (err) => {
+			console.warn('Websocket error: ' + err)
+		}
+
+		socket.onmessage = (e) => {
+			const message = e.data
+			console.info('Message received: ', message)
+		}
+
+		socket.onclose = (e) => {
+			console.log('Connection closed')
+		}
+
+		return socket
+	}
+	
+	initGame(initSquares) {
+		this.setState({
+			history: [{
+				squares: initSquares,
+				xWasNext: true
+			}],
+			stepNumber: 0,
+			xIsNext: true,
+			blackisAi: true
+		})
 	}
 
 	calculateWinner(xNumbers, oNumbers) {
@@ -83,7 +137,10 @@ export default class Game extends React.Component {
 		const history = this.state.history.slice(0, this.state.stepNumber + 1);
 		const current = history[this.state.stepNumber];
 
-		if (this.calculateWinner(current.xNumbers, current.oNumbers) || current.squares[i]) {
+		const xNumbers = current.squares.reduce((result, value) => { return value === 'X' ? result + 1 : result }, 0);
+		const oNumbers = current.squares.reduce((result, value) => { return value === 'O' ? result + 1 : result }, 0);
+
+		if (this.calculateWinner(xNumbers, oNumbers) || current.squares[i]) {
 			return;
 		}
 
@@ -93,22 +150,23 @@ export default class Game extends React.Component {
 			return;
 		}
 
-		const xNumbers = changedSquares.reduce((acc, current) => { return current === 'X' ? acc + 1 : acc }, 0);
-		const oNumbers = changedSquares.reduce((acc, current) => { return current === 'O' ? acc + 1 : acc }, 0);
-
 		let shouldTurnColor = this.checkAvailableMoves(!this.state.xIsNext, changedSquares).length > 0 ? !this.state.xIsNext : this.state.xIsNext
+
+		const doMove = this.state.blackisAi
+			? this.doRobotMove 
+			: this.socket.readyState === WebSocket.OPEN 
+				? this.sendMove(i)
+				: () => {}
 
 		this.setState({
 			history: history.concat([{
 				squares: changedSquares,
-				xNumbers: xNumbers,
-				oNumbers: oNumbers,
 				xWasNext: shouldTurnColor
 			}]),
 			stepNumber: history.length,
 			xIsNext: shouldTurnColor,
 		},
-		this.doRobotMove);
+		doMove);
 	}
 
 	doRobotMove() {
@@ -117,6 +175,14 @@ export default class Game extends React.Component {
 			if (bestMove !== null) {
 				this.handleClick(bestMove);
 			}
+		}
+	}
+
+	prepareSendMove(i) {
+		return () => {
+			this.socket.send({
+				position: i
+			})
 		}
 	}
 
@@ -138,7 +204,10 @@ export default class Game extends React.Component {
 		const history = this.state.history.slice();
 		const current = history[this.state.stepNumber];
 
-		let winner = this.calculateWinner(current.xNumbers, current.oNumbers);
+		const xNumbers = current.squares.reduce((result, value) => { return value === 'X' ? result + 1 : result }, 0);
+		const oNumbers = current.squares.reduce((result, value) => { return value === 'O' ? result + 1 : result }, 0);
+
+		let winner = this.calculateWinner(xNumbers, oNumbers);
 
 		const moves = history.map((step, move) => {
 			const desc = move ? 'Go to move #' + move : 'Go to game start';
@@ -162,7 +231,7 @@ export default class Game extends React.Component {
 
 		if ((availableMoves.length === 0) && (availableMovesOpposite.length === 0))
 		{
-			winner = current.xNumbers === current.oNumbers ? 'XO' : current.xNumbers > current.oNumbers ? 'X' : 'O';
+			winner = xNumbers === oNumbers ? 'XO' : xNumbers > oNumbers ? 'X' : 'O';
 		}
 
 		let status =
@@ -180,8 +249,8 @@ export default class Game extends React.Component {
 					<div></div>
 				</div>
 				<div className="game-info">
-					<div>White markers: {current.xNumbers}</div>
-					<div>Black markers: {current.oNumbers}</div>
+					<div>White markers: {xNumbers}</div>
+					<div>Black markers: {oNumbers}</div>
 					<br />
 					<div>Select a previous move:</div>
 					<div>{selectMoves()}</div>
