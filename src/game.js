@@ -14,7 +14,7 @@ export default class Game extends React.Component {
 		this.ai = new Ai(this);
 		this.isX = null
 		this.socket = null
-		
+
 		const initSquares = Array(64).fill(null);
 
 		this.state = {
@@ -32,14 +32,14 @@ export default class Game extends React.Component {
 			fetch(url).then(response => response.json()).then((data) => {
 				console.log(data)
 				this.gameId = data.id
-				this.initGame(data.board)
+				this.initGame(data.squares)
 				this.socket = this.openWebSocket()
 			})
 		} else {
 			const url = serverUrl + 'new-game/'
 			fetch(url, { method: 'POST' }).then(response => response.json()).then((data) => {
 				console.log(data)
-				this.initGame(data.board)
+				this.initGame(data.squares)
 				this.gameId = data.id
 				document.location.hash = data.id
 				this.socket = this.openWebSocket()
@@ -69,7 +69,7 @@ export default class Game extends React.Component {
 
 		return socket
 	}
-	
+
 	initGame(initSquares) {
 		this.setState({
 			history: [{
@@ -112,8 +112,8 @@ export default class Game extends React.Component {
 		let shouldTurnColor = this.checkAvailableMoves(!this.state.xIsNext, changedSquares).length > 0 ? !this.state.xIsNext : this.state.xIsNext
 
 		const doMove = this.state.blackisAi
-			? this.doRobotMove 
-			: this.socket.readyState === WebSocket.OPEN 
+			? this.doRobotMove
+			: this.socket.readyState === WebSocket.OPEN
 				? this.prepareSendMove(i)
 				: () => { console.log('Next player') }
 
@@ -143,11 +143,11 @@ export default class Game extends React.Component {
 			const headers = {
 				'Content-Type': 'application/json'
 			}
-			fetch(url, { 
-				method: 'PUT', 
-				mode: 'cors', 
-				headers, 
-				body: JSON.stringify(this.state.history[this.state.history.length - 1].squares) 
+			fetch(url, {
+				method: 'PUT',
+				mode: 'cors',
+				headers,
+				body: JSON.stringify(this.state.history[this.state.history.length - 1])
 			})
 		}
 	}
