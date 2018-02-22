@@ -26,9 +26,12 @@ const games = {}
 app.get('/', (req, res) => res.send('Backend is up!'))
 
 app.post('/new-game/', (req, res) => {
-    const ID = Math.random().toString(36).substr(2, 9)
-    games[ID] = req.body
-    res.status(201).send({ ID })
+    const id = Math.random().toString(36).substr(2, 9)
+    games[id] = {
+        id: id,
+        board: newBoard()
+    }
+    res.status(201).send(games[id])
 })
 
 app.get('/game/:id/', (req, res) => {
@@ -71,3 +74,15 @@ server.listen(4000, function listening() {
   console.log('Listening on %d', server.address().port)
 })
 // app.listen(4000, () => console.log('Example app listening on port 4000!'))
+
+
+// Helpers
+
+function newBoard() {
+    const initSquares = Array(8).fill(null).map(() => Array(8).fill(null))
+    initSquares[3][3] = 'X'
+    initSquares[3][4] = 'O'
+    initSquares[4][4] = 'X'
+    initSquares[4][3] = 'O'
+    return initSquares
+}
