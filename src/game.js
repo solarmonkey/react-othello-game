@@ -1,6 +1,5 @@
 import React from 'react';
 import Board from './board.js';
-import Ai from './ai.js';
 
 import { flipSquares } from './utils.js'
 
@@ -11,8 +10,6 @@ export default class Game extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.ai = new Ai(this);
-		this.isX = null
 		this.socket = null
 
 		const initSquares = Array(64).fill(null);
@@ -23,8 +20,7 @@ export default class Game extends React.Component {
 				xWasNext: true
 			}],
 			stepNumber: 0,
-			xIsNext: true,
-			blackisAi: false
+			xIsNext: true
 		}
 
 		if (document.location.hash) {
@@ -77,7 +73,6 @@ export default class Game extends React.Component {
 			}],
 			stepNumber: 0,
 			xIsNext: data.xWasNext,
-			blackisAi: false
 		})
 	}
 
@@ -110,11 +105,9 @@ export default class Game extends React.Component {
 
 		let shouldTurnColor = this.checkAvailableMoves(!this.state.xIsNext, changedSquares).length > 0 ? !this.state.xIsNext : this.state.xIsNext
 
-		const doMove = this.state.blackisAi
-			? this.doRobotMove
-			: this.socket.readyState === WebSocket.OPEN
-				? this.prepareSendMove(i)
-				: () => { console.log('Next player') }
+		const doMove = this.socket.readyState === WebSocket.OPEN
+			? this.prepareSendMove(i)
+			: () => { console.log('Next player') }
 
 		this.setState({
 			history: history.concat([{
@@ -125,15 +118,6 @@ export default class Game extends React.Component {
 			xIsNext: shouldTurnColor,
 		},
 		doMove);
-	}
-
-	doRobotMove() {
-		if ((this.state.blackisAi) && (!this.state.xIsNext)) {
-			var bestMove = this.ai.doMove();
-			if (bestMove !== null) {
-				this.handleClick(bestMove);
-			}
-		}
 	}
 
 	prepareSendMove(i) {
@@ -219,11 +203,6 @@ export default class Game extends React.Component {
 					<br />
 					<div>Select a previous move:</div>
 					<div>{selectMoves()}</div>
-					<br />
-					<div>
-						<input type="checkbox" checked={this.state.blackisAi} onChange={(e) => this.setState({ blackisAi: !this.state.blackisAi })}></input>
-						Make black player to a robot
-					</div>
 				</div>
 			</div>
 		);
