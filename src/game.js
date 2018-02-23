@@ -44,30 +44,30 @@ export default class Game extends React.Component {
 			})
 		}
 	}
-	
+
 	openWebSocket() {
 		const socket = new WebSocket('ws://localhost:4000/')
-		
+
 		socket.onopen = (e) => {
 			console.log('Connected to ' + e.currentTarget.url)
 		}
-		
+
 		socket.onerror = (err) => {
 			console.warn('Websocket error: ' + err)
 		}
-		
+
 		socket.onmessage = (e) => {
 			const message = e.data
 			console.log('Message received', message)
 		}
-		
+
 		socket.onclose = (e) => {
 			console.log('Connection closed')
 		}
-		
+
 		return socket
 	}
-	
+
 	initGame(data) {
 		this.gameId = data.id
 		this.setState({
