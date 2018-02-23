@@ -8,7 +8,7 @@ export function flipSquares(squares, position, xIsNext) {
     }
 
     // Iterate all directions, these numbers are the offsets in the array to reach next sqaure
-    [1, 7, 8, 9, -1, -7, -8, -9].forEach((offset) => {
+    calculateOffsets(8).forEach((offset) => {
         let flippedSquares = modifiedBoard ? modifiedBoard.slice() : squares.slice();
         let atLeastOneMarkIsFlipped = false;
         let [lastXpos, lastYPos] = [startX, startY];
@@ -40,4 +40,9 @@ export function flipSquares(squares, position, xIsNext) {
     });
 
     return modifiedBoard;
+}
+}
+
+export function calculateOffsets(index) {
+    return [1, -1].concat(index - 1).concat(index).concat(index + 1).concat(-index - 1).concat(-index).concat(-index + 1)
 }
